@@ -2,7 +2,8 @@ name: Sync Active Terms
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Every 30 minutes
+    - cron: '0 0-6 * * *'    # Every hour midnight–6am UTC
+    - cron: '*/30 7-23 * * *' # Every 30 minutes 7am–11:30pm UTC
   workflow_dispatch:
 
 jobs:

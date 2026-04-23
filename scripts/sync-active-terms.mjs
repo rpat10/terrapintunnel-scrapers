@@ -308,14 +308,32 @@ async function runActiveTermsSync() {
         const unique = Array.from(
           new Map(sectionsToUpsert.map((s) => [s.id, s])).values()
         )
-        const { error } = await supabase
-          .from('sections')
-          .upsert(unique, { onConflict: 'id' })
 
-        if (error) {
-          console.error(`   ⚠️  Upsert error: ${error.message}`)
-        } else {
-          termTotal += unique.length
+        // Filter out sections whose course doesn't exist in the courses table
+        const courseIds = [...new Set(unique.map((s) => s.course_id))]
+        const { data: existingCourses } = await supabase
+          .from('courses')
+          .select('id')
+          .in('id', courseIds)
+        const validCourseIds = new Set((existingCourses || []).map((c) => c.id))
+        const skipped = unique.filter((s) => !validCourseIds.has(s.course_id))
+        const valid = unique.filter((s) => validCourseIds.has(s.course_id))
+
+        if (skipped.length > 0) {
+          const skippedIds = [...new Set(skipped.map((s) => s.course_id))]
+          console.warn(`   ⚠️  Skipped ${skipped.length} sections — course(s) not in DB: ${skippedIds.join(', ')}`)
+        }
+
+        if (valid.length > 0) {
+          const { error } = await supabase
+            .from('sections')
+            .upsert(valid, { onConflict: 'id' })
+
+          if (error) {
+            console.error(`   ⚠️  Upsert error: ${error.message}`)
+          } else {
+            termTotal += valid.length
+          }
         }
       }
 
