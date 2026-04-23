@@ -1,0 +1,26 @@
+{
+  "name": "terrapintunnel-scrapers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rpat10/terrapintunnel-scrapers.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rpat10/terrapintunnel-scrapers/issues"
+  },
+  "homepage": "https://github.com/rpat10/terrapintunnel-scrapers#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
+    "cheerio": "^1.2.0",
+    "dotenv": "^17.3.1"
+  }
+}
