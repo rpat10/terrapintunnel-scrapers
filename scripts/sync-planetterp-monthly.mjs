@@ -183,14 +183,16 @@ async function runMonthlyPlanetTerpSync() {
     const ptProfs = await fetchAllFromPlanetTerp('professors')
     console.log(`   ✅ Received ${ptProfs.length} professors from PlanetTerp`)
 
-    // Build a name → average_rating lookup
+    // Build name → { average_rating, slug } lookups
     const ratingMap = new Map()
+    const slugMap   = new Map()
     for (const p of ptProfs) {
-      if (p.name && p.average_rating != null) {
-        ratingMap.set(p.name, p.average_rating)
-      }
+      if (!p.name) continue
+      if (p.average_rating != null) ratingMap.set(p.name, p.average_rating)
+      if (p.slug)                   slugMap.set(p.name, p.slug)
     }
     console.log(`   📐 Rating data available for ${ratingMap.size} professors`)
+    console.log(`   🔗 Slug data available for ${slugMap.size} professors`)
 
     // Fetch only the fields we need from sections
     console.log('   Fetching section ids + instructors from Supabase...')
@@ -198,6 +200,7 @@ async function runMonthlyPlanetTerpSync() {
     console.log(`   Found ${dbSections.length} sections in DB`)
 
     // Build update list, averaging ratings for co-taught sections
+    // prof_slug is only set for single-instructor sections (no canonical slug for co-taught)
     const ratingUpdates = []
     let multiInstructorCount = 0
     let noRatingCount = 0
@@ -217,17 +220,21 @@ async function runMonthlyPlanetTerpSync() {
       const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length
       if (ratings.length > 1) multiInstructorCount++
 
+      // Only assign a slug when there is exactly one instructor
+      const slug = names.length === 1 ? (slugMap.get(names[0]) ?? null) : null
+
       ratingUpdates.push({
         id,
         prof_rating: parseFloat(avg.toFixed(2)),
+        prof_slug: slug,
       })
     }
 
-    console.log(`   💾 Updating prof_rating for ${ratingUpdates.length} sections`)
+    console.log(`   💾 Updating prof_rating + prof_slug for ${ratingUpdates.length} sections`)
     console.log(`       (${multiInstructorCount} co-taught, ${noRatingCount} with no PlanetTerp data)`)
 
-    const savedRatings = await batchUpdate('sections', ratingUpdates, 'id', 'Prof Rating')
-    console.log(`   ✅ Updated prof_rating for ${savedRatings} sections\n`)
+    const savedRatings = await batchUpdate('sections', ratingUpdates, 'id', 'Prof Rating + Slug')
+    console.log(`   ✅ Updated prof_rating + prof_slug for ${savedRatings} sections\n`)
 
     // ── Summary ────────────────────────────────────────────────────────────────
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
@@ -235,7 +242,7 @@ async function runMonthlyPlanetTerpSync() {
     console.log('📊 PlanetTerp Monthly Sync Summary')
     console.log('==================================================')
     console.log(`   Courses with GPA updated:       ${savedGpas}`)
-    console.log(`   Sections with rating updated:   ${savedRatings}`)
+    console.log(`   Sections with rating+slug updated: ${savedRatings}`)
     console.log(`   Sections with no rating data:   ${noRatingCount}`)
     console.log(`   Elapsed:                        ${elapsed}s`)
     console.log('\n🎉 PlanetTerp monthly sync complete!')
