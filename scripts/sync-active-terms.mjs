@@ -363,8 +363,9 @@ async function scrapeSectionsForCourse(courseUrl, termId) {
       // Seat counts
       const openSeats  = parseInt($(element).find('.open-seats-count').text().trim(), 10) || 0
       const totalSeats = parseInt($(element).find('.total-seats-count').text().trim(), 10) || 0
-      // .first() prevents "18" + "0" (holdfile) from concatenating to "180"
-      const waitlist   = parseInt($(element).find('.waitlist-count').first().text().trim(), 10) || 0
+      const waitlistEls = $(element).find('.waitlist-count')
+      const waitlist   = parseInt(waitlistEls.eq(0).text().trim(), 10) || 0
+      const holdfile   = parseInt(waitlistEls.eq(1).text().trim(), 10) || 0
 
       // Meeting times — days, start/end time, building, room, type
       const meetings = []
@@ -403,6 +404,7 @@ async function scrapeSectionsForCourse(courseUrl, termId) {
         open_seats:     openSeats,
         total_seats:    totalSeats,
         waitlist:       waitlist,
+        holdfile:       holdfile,
         meeting_times:  meetings,
         section_type:   section_type,
         updated_at:     new Date().toISOString(),

@@ -81,6 +81,7 @@ async function runSnapshotSync() {
       .from('sections')
       .select('id, open_seats, waitlist, total_seats')
       .in('term_id', ACTIVE_TERM_IDS)
+      .order('id')
   )
   console.log(`   Found ${sections.length} sections across active terms`)
 

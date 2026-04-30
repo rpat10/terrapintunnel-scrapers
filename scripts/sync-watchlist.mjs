@@ -132,7 +132,7 @@ function parseSectionId(sectionId) {
 // Returns an array of section objects with only the fields we need to update.
 // ─────────────────────────────────────────────────────────────────────────────
 async function scrapeSeatData(courseId, termId) {
-  const url = `https://app.testudo.umd.edu/soc/search?courseId=${courseId}&sectionId=&termId=${termId}&_openSectionsOnly=on&creditCompare=&credits=&courseLevelFilter=ALL&instructor=&_facetoface=on&_blended=on&_online=on&courseStartCompare=&courseStartHour=&courseStartMin=&courseStartAM=&courseEndHour=&courseEndMin=&courseEndAM=&teachingCenter=ALL&_classDay1=on&_classDay2=on&_classDay3=on&_classDay4=on&_classDay5=on`
+  const url = `https://app.testudo.umd.edu/soc/search?courseId=${courseId}&sectionId=&termId=${termId}&creditCompare=&credits=&courseLevelFilter=ALL&instructor=&_facetoface=on&_blended=on&_online=on&courseStartCompare=&courseStartHour=&courseStartMin=&courseStartAM=&courseEndHour=&courseEndMin=&courseEndAM=&teachingCenter=ALL&_classDay1=on&_classDay2=on&_classDay3=on&_classDay4=on&_classDay5=on`
 
   try {
     const response = await fetchWithRetry(url, { headers: buildHeaders() })

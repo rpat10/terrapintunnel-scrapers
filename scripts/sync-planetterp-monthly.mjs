@@ -7,8 +7,8 @@
 //   • prof_rating → sections table  (from PlanetTerp /professors endpoint)
 //
 // This is an enhanced version of sync-planetterp.mjs with:
-//   - Explicit rate limiting (250ms between PlanetTerp pages)
-//   - Batch concurrency cap on DB updates (50 at a time)
+//   - Polite rate limiting (4.2s between PlanetTerp pages → ~30 min total)
+//   - Batch concurrency cap on DB updates (10 at a time)
 //   - Only overwrites existing values when PlanetTerp has a better one
 //     (non-null avg_gpa / average_rating)
 //   - Full pagination to handle PlanetTerp's 100-item page limit
@@ -29,8 +29,8 @@ const supabase = createClient(
 
 const PLANETTERP_BASE = 'https://planetterp.com/api/v1'
 const PT_PAGE_LIMIT    = 100   // PlanetTerp's max per-page result count
-const PT_DELAY_MS      = 250   // Delay between PlanetTerp pages (be respectful)
-const DB_UPDATE_CONCURRENCY = 50  // Concurrent Supabase UPDATE calls per batch
+const PT_DELAY_MS      = 4200  // ~4s between pages → ~30 min total (was 250ms/570s)
+const DB_UPDATE_CONCURRENCY = 10  // Conservative DB batch size
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PLANETTERP PAGINATOR
